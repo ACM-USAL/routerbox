@@ -1,0 +1,42 @@
+---
+- hosts: router
+  tasks:
+    - name: Set static network configuration
+      template: src=interfaces dest=/etc/network/interfaces
+    - sysctl: name=net.ipv4.ip_forward value=1
+    - apt: name=isc-dhcp-server
+    - name: DHCP configuration
+      template: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf
+      notify: restart dhcpd
+    - service: name=isc-dhcp-server enabled=yes
+    - apt: name=iptables-persistent
+    - name: iptables configuration
+      template: src=iptables.v4 dest=/etc/iptables/rules.v4
+      notify: update iptables
+    - apt: name=bridge-utils
+    - apt: name=hostapd
+    - template: src=default_hostapd dest=/etc/default/hostapd
+    - template: src=hostapd.conf dest=/etc/hostapd/hostapd.conf
+      notify: restart hostapd
+    - service: name=hostapd enabled=yes
+    - apt: name=squid
+    - script: get_ubuntu_mirrors.py > /etc/squid3/mirrors.json creates=/etc/squid3/mirrors.json
+    - copy: src=nesquid.py dest=/etc/squid3/nesquid.py mode=0755
+      notify: restart squid
+      tags: squid
+    - template: src=squid.conf dest=/etc/squid3/squid.conf
+      notify: restart squid
+      tags: squid
+    - file: path=/var/cache/squid state=directory owner=proxy group=proxy mode=0750
+      notify: create cache
+  handlers:
+    - name: restart dhcpd
+      service: name=isc-dhcp-server state=restarted
+    - name: update iptables
+      shell: iptables-restore < /etc/iptables/rules.v4
+    - name: restart hostapd
+      service: name=hostapd state=restarted
+    - name: restart squid
+      service: name=squid3 state=restarted
+    - name: create cache
+      shell: squid3 -z

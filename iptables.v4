@@ -1,0 +1,10 @@
+*nat
+-A PREROUTING -i {{ lan_iface }} -p tcp --dport 80 -j REDIRECT --to-port 3128
+-A PREROUTING -i {{ lan_iface }} -p tcp --dport 21 -j REDIRECT --to-port 3128
+-A POSTROUTING -o {{ wan_iface }} -j MASQUERADE
+COMMIT
+
+*filter
+-A FORWARD -i {{ wan_iface }} -o {{ lan_iface }} -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i {{ lan_iface }} -o {{ wan_iface }} -j ACCEPT
+COMMIT

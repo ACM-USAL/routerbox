@@ -1,0 +1,12 @@
+---
+
+wan_iface: eth1
+lan_iface: br0
+lan_wired_iface: eth0
+lan_wireless_iface: wlan0
+lan_ip: 10.7.0.1
+lan: 10.7.0.0/24
+dns_servers:
+ - 8.8.8.8
+ - 8.8.4.4
+domain_name: "installparty.usal.es"

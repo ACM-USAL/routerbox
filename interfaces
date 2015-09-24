@@ -1,0 +1,17 @@
+auto lo
+iface lo inet loopback
+
+auto {{ wan_iface }}
+iface {{ wan_iface }} inet dhcp
+
+auto {{ lan_wired_iface }}
+iface {{ lan_wired_iface }} inet manual
+
+auto {{ lan_wireless_iface }}
+iface {{ lan_wireless_iface }} inet manual
+
+auto {{ lan_iface }}
+iface {{ lan_iface }} inet static
+    address {{ lan_ip }}
+    netmask 255.255.255.0
+    bridge_ports {{ lan_wired_iface }} {{ lan_wireless_iface }}
